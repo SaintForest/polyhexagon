@@ -99,6 +99,8 @@ body {
     margin-top: 1rem;
     position: relative;
     height: 200px;
+    max-width: 300px;
+    margin: 2rem auto;
 }
 
 .mobile-controls button {
@@ -111,38 +113,39 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     position: absolute;
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 0 10px rgba(58, 141, 186, 0.2);
 }
 
 .mobile-controls button:hover {
     background: rgba(58, 141, 186, 0.2);
-    box-shadow: 0 0 10px rgba(58, 141, 186, 0.3);
+    box-shadow: 0 0 15px rgba(58, 141, 186, 0.4);
 }
 
 #upBtn {
-    top: 0;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
 }
 
 #leftBtn {
     top: 50%;
-    left: 0;
+    left: 20px;
     transform: translateY(-50%);
 }
 
 #rightBtn {
     top: 50%;
-    right: 0;
+    right: 20px;
     transform: translateY(-50%);
 }
 
 #downBtn {
-    bottom: 0;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
 }
@@ -171,7 +174,6 @@ body {
 
     .mobile-controls {
         display: block;
-        margin: 2rem auto;
     }
 
     #gameCanvas {
