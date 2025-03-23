@@ -4,13 +4,14 @@ class SnakeGame {
         this.ctx = this.canvas.getContext('2d');
         this.scoreElement = document.getElementById('scoreValue');
         this.startButton = document.getElementById('startButton');
+        this.gameOverMessage = document.querySelector('.game-over-message');
         
         // Grid settings
         this.gridSize = 12;
         
         // Game state
         this.snake = [];
-        this.food = null;
+        this.food = { x: 0, y: 0 };  // Initialize food with default position
         this.direction = 'right';
         this.nextDirection = 'right';
         this.score = 0;
@@ -49,8 +50,8 @@ class SnakeGame {
         this.canvas.height = size;
         this.tileSize = size / this.gridSize;
         
-        // Redraw the game if it's running
-        if (!this.isGameOver) {
+        // Only draw if the game is running
+        if (this.gameLoop) {
             this.draw();
         }
     }
@@ -117,9 +118,9 @@ class SnakeGame {
         this.nextDirection = 'right';
         this.score = 0;
         this.scoreElement.textContent = this.score;
-        this.scoreElement.style.color = '#E8B3B3';
-        this.scoreElement.style.fontWeight = 'normal';
-        this.scoreElement.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.5)';
+        if (this.gameOverMessage) {
+            this.gameOverMessage.style.display = 'none';
+        }
         this.isGameOver = false;
         this.startButton.disabled = true;
         
@@ -165,7 +166,7 @@ class SnakeGame {
         head.x = (head.x + this.gridSize) % this.gridSize;
         head.y = (head.y + this.gridSize) % this.gridSize;
         
-        // Check for self collision only
+        // Check for self collision
         if (this.snake.some(segment => segment.x === head.x && segment.y === head.y)) {
             this.gameOver();
             return;
@@ -183,24 +184,6 @@ class SnakeGame {
         }
         
         this.draw();
-    }
-    
-    checkCollision(head) {
-        // Only check for self collision now
-        return this.snake.some(segment => segment.x === head.x && segment.y === head.y);
-    }
-    
-    draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // Draw snake
-        this.snake.forEach((segment, index) => {
-            const color = this.colors.snake[index % this.colors.snake.length];
-            this.drawPolygon(segment.x, segment.y, color);
-        });
-        
-        // Draw food
-        this.drawPolygon(this.food.x, this.food.y, this.colors.food);
     }
     
     drawPolygon(x, y, color) {
@@ -229,23 +212,35 @@ class SnakeGame {
         this.ctx.stroke();
     }
     
+    draw() {
+        // Clear the canvas
+        this.ctx.fillStyle = '#000000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Draw snake
+        this.snake.forEach((segment, index) => {
+            const color = this.colors.snake[index % this.colors.snake.length];
+            this.drawPolygon(segment.x, segment.y, color);
+        });
+
+        // Draw food
+        this.drawPolygon(this.food.x, this.food.y, this.colors.food);
+
+        // Update score display
+        this.scoreElement.textContent = `Score: ${this.score}`;
+    }
+    
     gameOver() {
         this.isGameOver = true;
         clearInterval(this.gameLoop);
         this.startButton.disabled = false;
         this.startButton.textContent = 'Play Again';
-        
-        // Update score display with game over message
-        this.scoreElement.textContent = `${this.score} - Game Over!`;
-        this.scoreElement.style.color = '#E26E34';
-        this.scoreElement.style.fontWeight = 'bold';
-        this.scoreElement.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.5)';
-        
-        // Add a subtle border to the canvas to indicate game over
-        this.canvas.style.border = '2px solid #E26E34';
+        if (this.gameOverMessage) {
+            this.gameOverMessage.style.display = 'block';
+            this.gameOverMessage.textContent = 'Game Over!';
+        }
+        this.canvas.style.borderColor = '#E26E34';
         this.canvas.style.boxShadow = '0 0 20px rgba(226, 110, 52, 0.3)';
-        
-        // Draw the final state
         this.draw();
     }
 }
