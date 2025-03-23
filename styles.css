@@ -195,20 +195,21 @@ body {
 }
 
 @media (max-width: 768px) {
+    body {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
     .game-container {
         flex-direction: column;
-        padding: 0.25rem;
+        padding: env(safe-area-inset-top, 0.25rem) env(safe-area-inset-right, 0.25rem) 0 env(safe-area-inset-left, 0.25rem);
         gap: 0.25rem;
-        height: 100vh;
-        max-height: 100vh;
-        width: 100vw;
-        max-width: 100vw;
+        height: 100%;
+        width: 100%;
         overflow: hidden;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        position: relative;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -218,14 +219,14 @@ body {
         flex-direction: column;
         width: 100%;
         position: relative;
-        padding: 0.5rem 0;
+        padding: 0;
         display: flex;
         flex-direction: column;
-        justify-content: flex-start;
         align-items: center;
-        flex: 1 1 auto;
-        min-height: 0;
+        flex: 1;
         gap: 0.5rem;
+        margin-top: env(safe-area-inset-top, 10px);
+        overflow: hidden;
     }
 
     .game-status {
@@ -235,7 +236,6 @@ body {
         padding: 0.25rem;
         margin: 0;
         width: 100%;
-        top: 0;
         height: 24px;
     }
 
@@ -245,12 +245,6 @@ body {
         padding: 0.25rem 0.5rem;
         border-radius: 0.5rem;
         font-size: 0.8rem;
-        position: relative;
-        z-index: 20;
-    }
-
-    .game-over-message {
-        display: none;
     }
 
     #gameCanvas {
@@ -262,54 +256,61 @@ body {
 
     .mobile-controls {
         display: block;
-        margin: 0 auto;
+        margin: 0.5rem auto;
         padding: 0;
-        height: 110px;
+        height: 160px;
         position: relative;
         width: 100%;
-        max-width: 160px;
+        max-width: 200px;
     }
 
     .mobile-controls button {
-        width: 36px;
-        height: 36px;
-        font-size: 0.9rem;
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
         padding: 0;
-        border-width: 1px;
+        border-width: 2px;
+        background: rgba(0, 0, 0, 0.9);
+        position: absolute;
     }
 
     #upBtn {
-        top: 5px;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     #downBtn {
-        bottom: 5px;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     #leftBtn {
-        left: 5px;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     #rightBtn {
-        right: 5px;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
     }
 
     .sidebar {
         width: 100%;
-        max-width: unset;
-        padding: 0.25rem;
+        padding: 0.5rem;
         margin: 0;
-        position: relative;
-        background: rgba(0, 0, 0, 0.9);
+        background: rgba(0, 0, 0, 0.95);
         border-radius: 0.5rem 0.5rem 0 0;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        gap: 0.25rem;
-        flex: 0 0 auto;
-        height: auto;
-        min-height: 60px;
+        gap: 0.5rem;
+        min-height: 70px;
+        padding-bottom: calc(env(safe-area-inset-bottom, 0.5rem) + 0.5rem);
     }
 
     .logo-container {
@@ -317,6 +318,7 @@ body {
         height: 50px !important;
         margin: 0 0.5rem !important;
         flex: 0 0 auto;
+        position: relative;
     }
 
     .logo-container svg {
@@ -325,12 +327,13 @@ body {
     }
 
     .logo-container .progress-counter {
-        font-size: 8px !important;
+        font-size: 9px !important;
         top: -12px !important;
+        position: absolute;
     }
 
     .logo-container .completion-message {
-        font-size: 8px !important;
+        font-size: 9px !important;
         margin-top: 2px !important;
         white-space: nowrap;
     }
@@ -339,19 +342,20 @@ body {
         display: flex;
         flex-direction: row;
         justify-content: flex-end;
-        gap: 0.25rem;
+        gap: 0.5rem;
         padding: 0.25rem;
         margin: 0;
         flex: 1;
     }
 
     #startButton, #aiButton {
-        font-size: 0.75rem;
-        padding: 0.35rem 0.5rem;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.6rem;
         width: auto;
-        min-width: 80px;
+        min-width: 90px;
         margin: 0;
         white-space: nowrap;
+        position: relative;
     }
 }
 
@@ -362,12 +366,40 @@ body {
     }
 
     .mobile-controls {
-        height: 100px;
+        height: 140px;
     }
 
     .mobile-controls button {
-        width: 32px;
-        height: 32px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+
+    .sidebar {
+        min-height: 60px;
+        padding: 0.35rem;
+    }
+
+    #startButton, #aiButton {
         font-size: 0.8rem;
+        padding: 0.35rem 0.5rem;
+        min-width: 80px;
+    }
+}
+
+@media (max-height: 568px) {
+    #gameCanvas {
+        max-height: 30vh;
+        width: min(100%, 30vh);
+    }
+
+    .mobile-controls {
+        height: 120px;
+    }
+
+    .mobile-controls button {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
     }
 } 
