@@ -7,21 +7,24 @@ class SnakeGame {
         this.aiButton = document.getElementById('aiButton');
         this.gameOverMessage = document.querySelector('.game-over-message');
         
+        // Initialize logo handler
+        this.logoHandler = new LogoHandler();
+        
         // Grid settings
         this.gridSize = 16;
         
         // Game state
         this.snake = [];
-        this.food = { x: 0, y: 0 };  // Initialize food with default position
+        this.food = { x: 0, y: 0, color: null };  // Added color property
         this.direction = 'right';
         this.nextDirection = 'right';
         this.score = 0;
         this.gameLoop = null;
         this.isGameOver = false;
         this.isAIMode = false;
-        this.aiEnabledDuringGame = false;  // New flag to track if AI was enabled during gameplay
+        this.aiEnabledDuringGame = false;
         
-        // Color palette
+        // Color palette for snake
         this.colors = {
             snake: [
                 '#2E7BBF', '#3A8DBA', '#2D8286',  // Cool tones
@@ -30,7 +33,6 @@ class SnakeGame {
                 '#E26E34', '#D24531', '#B7302E',  // Warm tones
                 '#573746', '#703C3B', '#8C413D'   // Dark tones
             ],
-            food: '#E0302F',
             background: 'rgba(0, 0, 0, 0.2)'
         };
         
@@ -121,12 +123,15 @@ class SnakeGame {
         this.direction = 'right';
         this.nextDirection = 'right';
         this.score = 0;
-        this.aiEnabledDuringGame = false;  // Reset the AI flag
+        this.aiEnabledDuringGame = false;
         if (this.gameOverMessage) {
             this.gameOverMessage.style.display = 'none';
         }
         this.isGameOver = false;
         this.startButton.disabled = true;
+        
+        // Reset logo handler
+        this.logoHandler.reset();
         
         // Reset canvas style
         this.canvas.style.border = '2px solid #E26E34';
@@ -152,7 +157,10 @@ class SnakeGame {
             };
         } while (this.snake.some(segment => segment.x === food.x && segment.y === food.y));
         
-        this.food = food;
+        this.food = {
+            ...food,
+            color: this.logoHandler.getNextFoodColor()
+        };
     }
     
     toggleAI() {
@@ -254,6 +262,119 @@ class SnakeGame {
         return false;
     }
     
+    drawPolygon(x, y, color, isHead = false) {
+        const size = this.tileSize;
+        const centerX = x * size + size / 2;
+        const centerY = y * size + size / 2;
+        const radius = size * 0.45;
+        
+        this.ctx.beginPath();
+        // Draw a square
+        this.ctx.moveTo(centerX - radius, centerY - radius);
+        this.ctx.lineTo(centerX + radius, centerY - radius);
+        this.ctx.lineTo(centerX + radius, centerY + radius);
+        this.ctx.lineTo(centerX - radius, centerY + radius);
+        this.ctx.closePath();
+        
+        this.ctx.fillStyle = color;
+        this.ctx.fill();
+        
+        // Draw different outlines for head and body
+        if (isHead) {
+            this.ctx.strokeStyle = '#00FFFF'; // Bright cyan/neon blue for head
+            this.ctx.lineWidth = 2; // Slightly thicker line for head
+        } else {
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            this.ctx.lineWidth = 1;
+        }
+        this.ctx.stroke();
+    }
+    
+    drawFood() {
+        const size = this.tileSize;
+        const centerX = this.food.x * size + size / 2;
+        const centerY = this.food.y * size + size / 2;
+        const radius = size * 0.45;
+        
+        // Draw the food color
+        this.ctx.beginPath();
+        this.ctx.moveTo(centerX - radius, centerY - radius);
+        this.ctx.lineTo(centerX + radius, centerY - radius);
+        this.ctx.lineTo(centerX + radius, centerY + radius);
+        this.ctx.lineTo(centerX - radius, centerY + radius);
+        this.ctx.closePath();
+        
+        this.ctx.fillStyle = this.food.color;
+        this.ctx.fill();
+        
+        // Add neon glow effect
+        this.ctx.shadowColor = '#ff0000';
+        this.ctx.shadowBlur = 15;
+        this.ctx.strokeStyle = '#ff0000';
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+        
+        this.ctx.shadowColor = '#000000';
+        this.ctx.shadowBlur = 10;
+        this.ctx.strokeStyle = '#000000';
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
+        
+        this.ctx.shadowColor = '#ffff00';
+        this.ctx.shadowBlur = 20;
+        this.ctx.strokeStyle = '#ffff00';
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
+        
+        // Reset shadow
+        this.ctx.shadowColor = 'transparent';
+        this.ctx.shadowBlur = 0;
+    }
+    
+    draw() {
+        // Clear the canvas
+        this.ctx.fillStyle = '#000000';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Draw snake
+        this.snake.forEach((segment, index) => {
+            const color = this.colors.snake[index % this.colors.snake.length];
+            this.drawPolygon(segment.x, segment.y, color, index === 0);
+        });
+
+        // Draw food with neon effect
+        this.drawFood();
+    }
+    
+    gameOver() {
+        this.isGameOver = true;
+        clearInterval(this.gameLoop);
+        this.startButton.disabled = false;
+        this.startButton.textContent = 'Play Again';
+        if (this.gameOverMessage) {
+            this.gameOverMessage.style.display = 'block';
+            this.gameOverMessage.textContent = 'Game Over!';
+        }
+        this.canvas.style.borderColor = '#E26E34';
+        this.canvas.style.boxShadow = '0 0 20px rgba(226, 110, 52, 0.3)';
+        this.draw();
+
+        // Reset AI mode and score display
+        this.isAIMode = false;
+        this.aiButton.classList.remove('active');
+        this.updateScoreDisplay();
+    }
+
+    updateScoreDisplay() {
+        const scoreLabel = document.querySelector('.score');
+        const scoreValue = document.getElementById('scoreValue');
+        if (this.aiEnabledDuringGame || this.isAIMode) {
+            scoreLabel.innerHTML = 'Score(AI): <span id="scoreValue">' + this.score + '</span>';
+        } else {
+            scoreLabel.innerHTML = 'Score: <span id="scoreValue">' + this.score + '</span>';
+        }
+    }
+
     update() {
         if (this.isGameOver) return;
         
@@ -290,85 +411,14 @@ class SnakeGame {
         // Check if food is eaten
         if (head.x === this.food.x && head.y === this.food.y) {
             this.score += 10;
-            this.updateScoreDisplay();  // Update the full score display
+            this.updateScoreDisplay();
+            this.logoHandler.revealColor(this.food.color);
             this.generateFood();
         } else {
             this.snake.pop();
         }
         
         this.draw();
-    }
-    
-    drawPolygon(x, y, color, isHead = false) {
-        const size = this.tileSize;
-        const centerX = x * size + size / 2;
-        const centerY = y * size + size / 2;
-        const radius = size * 0.45;
-        
-        this.ctx.beginPath();
-        // Draw a square
-        this.ctx.moveTo(centerX - radius, centerY - radius);
-        this.ctx.lineTo(centerX + radius, centerY - radius);
-        this.ctx.lineTo(centerX + radius, centerY + radius);
-        this.ctx.lineTo(centerX - radius, centerY + radius);
-        this.ctx.closePath();
-        
-        this.ctx.fillStyle = color;
-        this.ctx.fill();
-        
-        // Draw different outlines for head and body
-        if (isHead) {
-            this.ctx.strokeStyle = '#00FFFF'; // Bright cyan/neon blue for head
-            this.ctx.lineWidth = 2; // Slightly thicker line for head
-        } else {
-            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-            this.ctx.lineWidth = 1;
-        }
-        this.ctx.stroke();
-    }
-    
-    draw() {
-        // Clear the canvas
-        this.ctx.fillStyle = '#000000';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Draw snake
-        this.snake.forEach((segment, index) => {
-            const color = this.colors.snake[index % this.colors.snake.length];
-            this.drawPolygon(segment.x, segment.y, color, index === 0); // Pass true for head (index 0)
-        });
-
-        // Draw food
-        this.drawPolygon(this.food.x, this.food.y, this.colors.food);
-    }
-    
-    gameOver() {
-        this.isGameOver = true;
-        clearInterval(this.gameLoop);
-        this.startButton.disabled = false;
-        this.startButton.textContent = 'Play Again';
-        if (this.gameOverMessage) {
-            this.gameOverMessage.style.display = 'block';
-            this.gameOverMessage.textContent = 'Game Over!';
-        }
-        this.canvas.style.borderColor = '#E26E34';
-        this.canvas.style.boxShadow = '0 0 20px rgba(226, 110, 52, 0.3)';
-        this.draw();
-
-        // Reset AI mode and score display
-        this.isAIMode = false;
-        this.aiButton.classList.remove('active');
-        this.updateScoreDisplay();
-    }
-
-    updateScoreDisplay() {
-        const scoreLabel = document.querySelector('.score');
-        const scoreValue = document.getElementById('scoreValue');
-        if (this.aiEnabledDuringGame || this.isAIMode) {
-            scoreLabel.innerHTML = 'Score(AI): <span id="scoreValue">' + this.score + '</span>';
-        } else {
-            scoreLabel.innerHTML = 'Score: <span id="scoreValue">' + this.score + '</span>';
-        }
     }
 }
 
