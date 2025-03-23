@@ -4,10 +4,11 @@ class SnakeGame {
         this.ctx = this.canvas.getContext('2d');
         this.scoreElement = document.getElementById('scoreValue');
         this.startButton = document.getElementById('startButton');
+        this.aiButton = document.getElementById('aiButton');
         this.gameOverMessage = document.querySelector('.game-over-message');
         
         // Grid settings
-        this.gridSize = 12;
+        this.gridSize = 16;
         
         // Game state
         this.snake = [];
@@ -17,6 +18,8 @@ class SnakeGame {
         this.score = 0;
         this.gameLoop = null;
         this.isGameOver = false;
+        this.isAIMode = false;
+        this.aiEnabledDuringGame = false;  // New flag to track if AI was enabled during gameplay
         
         // Color palette
         this.colors = {
@@ -60,6 +63,7 @@ class SnakeGame {
         // Keyboard controls
         document.addEventListener('keydown', (e) => this.handleKeyPress(e));
         this.startButton.addEventListener('click', () => this.startGame());
+        this.aiButton.addEventListener('click', () => this.toggleAI());
         
         // Mobile controls
         const leftBtn = document.getElementById('leftBtn');
@@ -117,7 +121,7 @@ class SnakeGame {
         this.direction = 'right';
         this.nextDirection = 'right';
         this.score = 0;
-        this.scoreElement.textContent = '0';
+        this.aiEnabledDuringGame = false;  // Reset the AI flag
         if (this.gameOverMessage) {
             this.gameOverMessage.style.display = 'none';
         }
@@ -133,7 +137,10 @@ class SnakeGame {
         
         // Start game loop
         if (this.gameLoop) clearInterval(this.gameLoop);
-        this.gameLoop = setInterval(() => this.update(), 150);
+        this.gameLoop = setInterval(() => this.update(), 120);
+
+        // Update score display based on initial AI mode
+        this.updateScoreDisplay();
     }
     
     generateFood() {
@@ -148,8 +155,114 @@ class SnakeGame {
         this.food = food;
     }
     
+    toggleAI() {
+        this.isAIMode = !this.isAIMode;
+        this.aiButton.classList.toggle('active', this.isAIMode);
+        
+        // If game is running, mark that AI was enabled during gameplay
+        if (this.gameLoop && !this.isGameOver) {
+            this.aiEnabledDuringGame = true;
+        }
+        
+        // Update score display
+        this.updateScoreDisplay();
+        
+        // If game is not running, start it automatically
+        if (this.isAIMode && !this.gameLoop) {
+            this.startGame();
+        }
+    }
+    
+    findPathToFood() {
+        const head = this.snake[0];
+        const possibleMoves = [
+            { dir: 'up', x: head.x, y: (head.y - 1 + this.gridSize) % this.gridSize },
+            { dir: 'down', x: head.x, y: (head.y + 1) % this.gridSize },
+            { dir: 'left', x: (head.x - 1 + this.gridSize) % this.gridSize, y: head.y },
+            { dir: 'right', x: (head.x + 1) % this.gridSize, y: head.y }
+        ];
+
+        // Filter out moves that would cause immediate collision
+        const safeMoves = possibleMoves.filter(move => {
+            // Check for immediate collision with snake body
+            if (this.snake.some(segment => segment.x === move.x && segment.y === move.y)) {
+                return false;
+            }
+
+            // Check if this move would trap the snake
+            const futureSnake = [
+                { x: move.x, y: move.y },
+                ...this.snake.slice(0, -1)
+            ];
+            
+            // Check if there's a path to the food after this move
+            const canReachFood = this.hasPathToFood(move.x, move.y, futureSnake);
+            return canReachFood;
+        });
+
+        if (safeMoves.length === 0) return null;
+
+        // Find the move that gets us closest to the food
+        let bestMove = null;
+        let minDistance = Infinity;
+
+        for (const move of safeMoves) {
+            const distance = Math.abs(move.x - this.food.x) + Math.abs(move.y - this.food.y);
+            if (distance < minDistance) {
+                minDistance = distance;
+                bestMove = move;
+            }
+        }
+
+        return bestMove ? bestMove.dir : null;
+    }
+
+    hasPathToFood(startX, startY, snake) {
+        const visited = new Set();
+        const queue = [{ x: startX, y: startY }];
+        visited.add(`${startX},${startY}`);
+
+        while (queue.length > 0) {
+            const current = queue.shift();
+            
+            // If we reached the food, we found a path
+            if (current.x === this.food.x && current.y === this.food.y) {
+                return true;
+            }
+
+            // Check all possible moves
+            const moves = [
+                { x: current.x, y: (current.y - 1 + this.gridSize) % this.gridSize },
+                { x: current.x, y: (current.y + 1) % this.gridSize },
+                { x: (current.x - 1 + this.gridSize) % this.gridSize, y: current.y },
+                { x: (current.x + 1) % this.gridSize, y: current.y }
+            ];
+
+            for (const move of moves) {
+                const key = `${move.x},${move.y}`;
+                
+                // Skip if already visited or if it's part of the snake
+                if (visited.has(key) || snake.some(segment => segment.x === move.x && segment.y === move.y)) {
+                    continue;
+                }
+
+                visited.add(key);
+                queue.push(move);
+            }
+        }
+
+        return false;
+    }
+    
     update() {
         if (this.isGameOver) return;
+        
+        if (this.isAIMode) {
+            const aiMove = this.findPathToFood();
+            if (aiMove) {
+                this.handleDirection(aiMove);
+            }
+        }
         
         this.direction = this.nextDirection;
         const head = { ...this.snake[0] };
@@ -177,7 +290,7 @@ class SnakeGame {
         // Check if food is eaten
         if (head.x === this.food.x && head.y === this.food.y) {
             this.score += 10;
-            this.scoreElement.textContent = this.score;
+            this.updateScoreDisplay();  // Update the full score display
             this.generateFood();
         } else {
             this.snake.pop();
@@ -186,29 +299,31 @@ class SnakeGame {
         this.draw();
     }
     
-    drawPolygon(x, y, color) {
+    drawPolygon(x, y, color, isHead = false) {
         const size = this.tileSize;
         const centerX = x * size + size / 2;
         const centerY = y * size + size / 2;
-        const radius = size * 0.35;
+        const radius = size * 0.45;
         
         this.ctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-            const angle = (i * Math.PI * 2) / 6;
-            const px = centerX + radius * Math.cos(angle);
-            const py = centerY + radius * Math.sin(angle);
-            
-            if (i === 0) {
-                this.ctx.moveTo(px, py);
-            } else {
-                this.ctx.lineTo(px, py);
-            }
-        }
+        // Draw a square
+        this.ctx.moveTo(centerX - radius, centerY - radius);
+        this.ctx.lineTo(centerX + radius, centerY - radius);
+        this.ctx.lineTo(centerX + radius, centerY + radius);
+        this.ctx.lineTo(centerX - radius, centerY + radius);
         this.ctx.closePath();
         
         this.ctx.fillStyle = color;
         this.ctx.fill();
-        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        
+        // Draw different outlines for head and body
+        if (isHead) {
+            this.ctx.strokeStyle = '#00FFFF'; // Bright cyan/neon blue for head
+            this.ctx.lineWidth = 2; // Slightly thicker line for head
+        } else {
+            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            this.ctx.lineWidth = 1;
+        }
         this.ctx.stroke();
     }
     
@@ -220,7 +335,7 @@ class SnakeGame {
         // Draw snake
         this.snake.forEach((segment, index) => {
             const color = this.colors.snake[index % this.colors.snake.length];
-            this.drawPolygon(segment.x, segment.y, color);
+            this.drawPolygon(segment.x, segment.y, color, index === 0); // Pass true for head (index 0)
         });
 
         // Draw food
@@ -239,6 +354,21 @@ class SnakeGame {
         this.canvas.style.borderColor = '#E26E34';
         this.canvas.style.boxShadow = '0 0 20px rgba(226, 110, 52, 0.3)';
         this.draw();
+
+        // Reset AI mode and score display
+        this.isAIMode = false;
+        this.aiButton.classList.remove('active');
+        this.updateScoreDisplay();
+    }
+
+    updateScoreDisplay() {
+        const scoreLabel = document.querySelector('.score');
+        const scoreValue = document.getElementById('scoreValue');
+        if (this.aiEnabledDuringGame || this.isAIMode) {
+            scoreLabel.innerHTML = 'Score(AI): <span id="scoreValue">' + this.score + '</span>';
+        } else {
+            scoreLabel.innerHTML = 'Score: <span id="scoreValue">' + this.score + '</span>';
+        }
     }
 }
 
