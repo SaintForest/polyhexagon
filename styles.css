@@ -31,14 +31,47 @@ body {
     padding: 2rem;
     border-radius: 1rem;
     text-align: center;
-    font-size: 1.2rem;
     max-width: 90%;
     z-index: 1000;
     box-shadow: 0 0 20px rgba(226, 110, 52, 0.3);
     border: 2px solid #E26E34;
 }
 
-@media (max-width: 768px) {
+.mobile-text {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.mobile-subtext {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1.5rem;
+}
+
+.mobile-ai-button {
+    background: linear-gradient(135deg, #2E7BBF 0%, #3A8DBA 50%, #2D8286 100%);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1.1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.mobile-ai-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(46, 123, 191, 0.3);
+}
+
+.mobile-ai-button.active {
+    background: linear-gradient(135deg, #2D8286 0%, #2E7BBF 50%, #3A8DBA 100%);
+    box-shadow: 0 5px 15px rgba(46, 123, 191, 0.5);
+}
+
+@media (max-width: 600px) {
     .mobile-only-message {
         display: block;
     }

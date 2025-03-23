@@ -5,6 +5,7 @@ class SnakeGame {
         this.scoreElement = document.getElementById('scoreValue');
         this.startButton = document.getElementById('startButton');
         this.aiButton = document.getElementById('aiButton');
+        this.mobileAiButton = document.getElementById('mobileAiButton');
         this.gameOverMessage = document.querySelector('.game-over-message');
         
         // Initialize logo handler
@@ -63,6 +64,9 @@ class SnakeGame {
         document.addEventListener('keydown', (e) => this.handleKeyPress(e));
         this.startButton.addEventListener('click', () => this.startGame());
         this.aiButton.addEventListener('click', () => this.toggleAI());
+        if (this.mobileAiButton) {
+            this.mobileAiButton.addEventListener('click', () => this.toggleAI());
+        }
     }
     
     handleDirection(newDirection) {
@@ -145,6 +149,9 @@ class SnakeGame {
     toggleAI() {
         this.isAIMode = !this.isAIMode;
         this.aiButton.classList.toggle('active', this.isAIMode);
+        if (this.mobileAiButton) {
+            this.mobileAiButton.classList.toggle('active', this.isAIMode);
+        }
         
         // If game is running, mark that AI was enabled during gameplay
         if (this.gameLoop && !this.isGameOver) {
