@@ -117,7 +117,7 @@ class SnakeGame {
         this.direction = 'right';
         this.nextDirection = 'right';
         this.score = 0;
-        this.scoreElement.textContent = this.score;
+        this.scoreElement.textContent = '0';
         if (this.gameOverMessage) {
             this.gameOverMessage.style.display = 'none';
         }
@@ -225,9 +225,6 @@ class SnakeGame {
 
         // Draw food
         this.drawPolygon(this.food.x, this.food.y, this.colors.food);
-
-        // Update score display
-        this.scoreElement.textContent = `Score: ${this.score}`;
     }
     
     gameOver() {
