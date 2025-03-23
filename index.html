@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Polygonal Snake Game</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="mobile-only-message">This game is designed for desktop play only. Please use a computer to play.</div>
     <div class="game-container">
         <div class="game-area">
             <div class="game-status">
@@ -14,17 +14,12 @@
                 <div class="game-over-message"></div>
             </div>
             <canvas id="gameCanvas"></canvas>
-            <div class="mobile-controls">
-                <button id="leftBtn">←</button>
-                <button id="upBtn">↑</button>
-                <button id="rightBtn">→</button>
-                <button id="downBtn">↓</button>
-            </div>
         </div>
         <div class="sidebar">
             <div class="controls">
                 <button id="startButton">Start Game</button>
                 <button id="aiButton">Play with AI</button>
+                <div class="credit">by Anurag</div>
             </div>
         </div>
     </div>

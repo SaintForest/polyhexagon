@@ -41,9 +41,6 @@ class SnakeGame {
         
         // Handle window resize
         window.addEventListener('resize', () => this.resizeCanvas());
-        
-        // Prevent default touch behavior
-        document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
     }
     
     resizeCanvas() {
@@ -66,24 +63,6 @@ class SnakeGame {
         document.addEventListener('keydown', (e) => this.handleKeyPress(e));
         this.startButton.addEventListener('click', () => this.startGame());
         this.aiButton.addEventListener('click', () => this.toggleAI());
-        
-        // Mobile controls
-        const leftBtn = document.getElementById('leftBtn');
-        const rightBtn = document.getElementById('rightBtn');
-        const upBtn = document.getElementById('upBtn');
-        const downBtn = document.getElementById('downBtn');
-        
-        // Touch events for mobile buttons
-        leftBtn.addEventListener('touchstart', () => this.handleDirection('left'));
-        rightBtn.addEventListener('touchstart', () => this.handleDirection('right'));
-        upBtn.addEventListener('touchstart', () => this.handleDirection('up'));
-        downBtn.addEventListener('touchstart', () => this.handleDirection('down'));
-        
-        // Click events for mobile buttons
-        leftBtn.addEventListener('click', () => this.handleDirection('left'));
-        rightBtn.addEventListener('click', () => this.handleDirection('right'));
-        upBtn.addEventListener('click', () => this.handleDirection('up'));
-        downBtn.addEventListener('click', () => this.handleDirection('down'));
     }
     
     handleDirection(newDirection) {
