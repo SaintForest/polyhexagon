@@ -117,8 +117,15 @@ class SnakeGame {
         this.nextDirection = 'right';
         this.score = 0;
         this.scoreElement.textContent = this.score;
+        this.scoreElement.style.color = '#E8B3B3';
+        this.scoreElement.style.fontWeight = 'normal';
+        this.scoreElement.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.5)';
         this.isGameOver = false;
         this.startButton.disabled = true;
+        
+        // Reset canvas style
+        this.canvas.style.border = '2px solid #E26E34';
+        this.canvas.style.boxShadow = '0 0 15px rgba(226, 110, 52, 0.2)';
         
         // Generate initial food
         this.generateFood();
@@ -228,17 +235,18 @@ class SnakeGame {
         this.startButton.disabled = false;
         this.startButton.textContent = 'Play Again';
         
-        // Draw game over message
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // Update score display with game over message
+        this.scoreElement.textContent = `${this.score} - Game Over!`;
+        this.scoreElement.style.color = '#E26E34';
+        this.scoreElement.style.fontWeight = 'bold';
+        this.scoreElement.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.5)';
         
-        this.ctx.fillStyle = '#E8B3B3';
-        this.ctx.font = '48px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('Game Over!', this.canvas.width / 2, this.canvas.height / 2);
+        // Add a subtle border to the canvas to indicate game over
+        this.canvas.style.border = '2px solid #E26E34';
+        this.canvas.style.boxShadow = '0 0 20px rgba(226, 110, 52, 0.3)';
         
-        this.ctx.font = '24px Arial';
-        this.ctx.fillText(`Final Score: ${this.score}`, this.canvas.width / 2, this.canvas.height / 2 + 40);
+        // Draw the final state
+        this.draw();
     }
 }
 
