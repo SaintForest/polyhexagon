@@ -18,7 +18,7 @@ class LogoHandler {
         this.completionMessage.style.marginTop = '10px';
         this.completionMessage.style.fontSize = '14px';
         this.completionMessage.style.display = 'none';
-        this.completionMessage.textContent = 'Full Logo Revealed!';
+        this.completionMessage.textContent = 'Coming Soon: OneAI!';
         
         // Add to sidebar before the controls div
         const sidebar = document.querySelector('.sidebar');
@@ -133,7 +133,7 @@ class LogoHandler {
         this.progressCounter.style.fontSize = '14px';
         this.progressCounter.style.fontWeight = 'bold';
         this.progressCounter.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.5)';
-        this.progressCounter.textContent = 'Logo Revealed: 0%';
+        this.progressCounter.textContent = 'Access Progress: 0%';
         this.logoContainer.appendChild(this.progressCounter);
         
         // Style the SVG element itself
@@ -222,7 +222,7 @@ class LogoHandler {
                 
                 // Update progress counter
                 const percentage = Math.round((this.revealedBlocks.size / 49) * 100);
-                this.progressCounter.textContent = `Logo Revealed: ${percentage}%`;
+                this.progressCounter.textContent = `Access Progress: ${percentage}%`;
                 
                 // Remove the revealed block from remaining blocks
                 const index = this.remainingBlocks.indexOf(matchingBlock);
@@ -252,7 +252,7 @@ class LogoHandler {
         this.completionMessage.style.display = 'none';
         
         // Reset progress counter
-        this.progressCounter.textContent = 'Logo Revealed: 0%';
+        this.progressCounter.textContent = 'Access Progress: 0%';
         
         this.blocks.forEach(block => {
             // Reset to invisible state
